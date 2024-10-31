@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Roasting Timer</title>
+    <link href="output.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-8 rounded shadow-md text-center">
+        <h1 class="text-2xl font-bold mb-4">Coffee Roasting Timer</h1>
+        <div class="mb-4 flex flex-auto gap-2">
+            <button id="charge" class="bg-blue-500 text-white px-4 py-2 rounded">Charge</button>
+            <button id="dryEnd" class="bg-yellow-500 text-white px-4 py-2 rounded ml-2">Dry End</button>
+            <button id="firstCrack" class="bg-red-500 text-white px-4 py-2 rounded ml-2">First Crack</button>
+            <button id="end" class="bg-green-500 text-white px-4 py-2 rounded ml-2">End</button>
+        </div>
+        <div>
+            <p id="timer" class="text-[48px] font-mono mb-4">00:00:00</p>
+            <p id="dryingRatio" class="text-lg">Drying Ratio: N/A</p>
+            <p id="maillardRatio" class="text-lg">Maillard Ratio: N/A</p>
+            <p id="developmentRatio" class="text-lg">Development Ratio: N/A</p>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
