@@ -1,6 +1,3 @@
-Sure, here's a `README.md` file for deploying the Coffee Roasting Timer application:
-
-```markdown
 # Coffee Roasting Timer
 
 This application is a timer that calculates the Maillard Ratio, Development Ratio, and Drying Ratio during the coffee roasting process. It is built with HTML, JavaScript, and Tailwind CSS, and can be served using NPM and PM2.
