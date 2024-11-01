@@ -6,6 +6,7 @@ let timerInterval;
 let dryingInterval;
 let maillardInterval;
 let developmentInterval;
+let lockedMaillardTime;
 
 const chargeButton = document.getElementById('charge');
 const dryEndButton = document.getElementById('dryEnd');
@@ -43,7 +44,7 @@ function calculateAndUpdateRatios() {
 
     // Calculate Maillard Ratio
     if (dryEndTime) {
-        const maillardTime = (currentTime - dryEndTime) / 1000; // Maillard phase time in seconds
+        const maillardTime = lockedMaillardTime ? lockedMaillardTime : (currentTime - dryEndTime) / 1000; // Maillard phase time in seconds
         const maillardRatio = (maillardTime / totalTime * 100).toFixed(2); // convert to percentage
         maillardRatioDisplay.textContent = `Maillard Ratio: ${(maillardTime / 60).toFixed(2)} minutes (${maillardRatio}%)`;
     }
@@ -66,6 +67,7 @@ chargeButton.addEventListener('click', () => {
     maillardRatioDisplay.textContent = `Maillard Ratio: N/A`;
     developmentRatioDisplay.textContent = `Development Ratio: N/A`;
     dryingInterval = setInterval(calculateAndUpdateRatios, 1000);
+    lockedMaillardTime = null; // Reset locked Maillard time
 });
 
 dryEndButton.addEventListener('click', () => {
@@ -76,6 +78,8 @@ dryEndButton.addEventListener('click', () => {
 
 firstCrackButton.addEventListener('click', () => {
     firstCrackTime = new Date();
+    clearInterval(maillardInterval); // Stop Maillard ratio calculation
+    lockedMaillardTime = (firstCrackTime - dryEndTime) / 1000; // Lock Maillard phase time in seconds
     clearInterval(developmentInterval);
     developmentInterval = setInterval(calculateAndUpdateRatios, 1000);
 });
