@@ -39,21 +39,21 @@ function calculateAndUpdateRatios() {
     if (dryEndTime) {
         const dryingTime = (dryEndTime - startTime) / 1000; // drying time in seconds
         const dryingRatio = (dryingTime / totalTime * 100).toFixed(2); // convert to percentage
-        dryingRatioDisplay.textContent = `Drying Ratio: ${(dryingTime / 60).toFixed(2)} minutes (${dryingRatio}%)`;
+        dryingRatioDisplay.textContent = `Drying Ratio: ${String(Math.floor(dryingTime / 60)).padStart(2, '0')}:${String(Math.floor(dryingTime % 60)).padStart(2, '0')} (${dryingRatio}%)`;
     }
 
     // Calculate Maillard Ratio
     if (dryEndTime) {
         const maillardTime = lockedMaillardTime ? lockedMaillardTime : (currentTime - dryEndTime) / 1000; // Maillard phase time in seconds
         const maillardRatio = (maillardTime / totalTime * 100).toFixed(2); // convert to percentage
-        maillardRatioDisplay.textContent = `Maillard Ratio: ${(maillardTime / 60).toFixed(2)} minutes (${maillardRatio}%)`;
+        maillardRatioDisplay.textContent = `Maillard Ratio: ${String(Math.floor(maillardTime / 60)).padStart(2, '0')}:${String(Math.floor(maillardTime % 60)).padStart(2, '0')} (${maillardRatio}%)`;
     }
 
     // Calculate Development Ratio
     if (firstCrackTime) {
         const developmentTime = (currentTime - firstCrackTime) / 1000; // Development phase time in seconds
         const developmentRatio = (developmentTime / totalTime * 100).toFixed(2); // convert to percentage
-        developmentRatioDisplay.textContent = `Development Ratio: ${(developmentTime / 60).toFixed(2)} minutes (${developmentRatio}%)`;
+        developmentRatioDisplay.textContent = `Development Ratio: ${String(Math.floor(developmentTime / 60)).padStart(2, '0')}:${String(Math.floor(developmentTime % 60)).padStart(2, '0')} (${developmentRatio}%)`;
     }
 }
 
