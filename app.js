@@ -12,6 +12,7 @@ const chargeButton = document.getElementById('charge');
 const dryEndButton = document.getElementById('dryEnd');
 const firstCrackButton = document.getElementById('firstCrack');
 const endButton = document.getElementById('end');
+const resetButton = document.getElementById('reset');
 const timerDisplay = document.getElementById('timer');
 
 const dryingRatioDisplay = document.getElementById('dryingRatio');
@@ -106,6 +107,7 @@ function setButtonStates() {
     dryEndButton.disabled = !running || !!dryEndTime;
     firstCrackButton.disabled = !running || !dryEndTime || !!firstCrackTime;
     endButton.disabled = !running;
+    resetButton.disabled = !startTime;
 }
 
 chargeButton.addEventListener('click', () => {
@@ -153,6 +155,24 @@ endButton.addEventListener('click', () => {
     renderRoastProfile();
     setButtonStates();
     saveSession();
+});
+resetButton.addEventListener('click', () => {
+    clearInterval(timerInterval);
+    clearInterval(dryingInterval);
+    clearInterval(maillardInterval);
+    clearInterval(developmentInterval);
+    startTime = null;
+    dryEndTime = null;
+    firstCrackTime = null;
+    endTime = null;
+    lockedMaillardTime = null;
+    entries = [];
+    initialWeightInput.value = '';
+    timerDisplay.textContent = '00:00:00';
+    resetPhaseIndicators();
+    renderRoastProfile();
+    setButtonStates();
+    localStorage.removeItem(STORAGE_KEY);
 });
 
 // ── Roast profile: BT, ET, ROR, weight ──────────────────────────
@@ -230,7 +250,7 @@ function renderRoastProfile() {
     entries.forEach(entry => {
         if (prev) {
             const dtMin = (entry.t - prev.t) / 60;
-            entry.ror = dtMin > 0 ? (entry.bt - prev.bt) / dtMin : null;
+            entry.ror = dtMin > 0 ? Math.max(0, (entry.bt - prev.bt) / dtMin) : null;
         }
         prev = entry;
     });
