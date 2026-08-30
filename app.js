@@ -168,6 +168,9 @@ const statAvgRor = document.getElementById('statAvgRor');
 const statPeakRor = document.getElementById('statPeakRor');
 const statLoss = document.getElementById('statLoss');
 const entryTableBody = document.getElementById('entryTableBody');
+const exportButton = document.getElementById('exportSession');
+const importButton = document.getElementById('importSession');
+const importFile = document.getElementById('importFile');
 
 let entries = [];
 
@@ -267,6 +270,7 @@ function renderRoastProfile() {
 
     lastLogDisplay.textContent = entries.length ? `${entries.length} logs` : '';
     undoEntryButton.disabled = entries.length === 0;
+    exportButton.disabled = entries.length === 0;
     refreshLogButtonState();
 }
 
@@ -306,6 +310,53 @@ undoEntryButton.addEventListener('click', () => {
     renderRoastProfile();
     saveSession();
 });
+exportButton.addEventListener('click', () => {
+    if (!startTime || !entries.length) return;
+    const data = {
+        start: startTime.getTime(),
+        dryEnd: dryEndTime ? dryEndTime.getTime() : null,
+        firstCrack: firstCrackTime ? firstCrackTime.getTime() : null,
+        end: endTime ? endTime.getTime() : null,
+        entries,
+        greenWeight: initialWeightInput.value,
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const d = new Date(startTime);
+    const pad = n => String(n).padStart(2, '0');
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `roast-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}-${pad(d.getHours())}-${pad(d.getMinutes())}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+});
+
+importButton.addEventListener('click', () => importFile.click());
+
+importFile.addEventListener('change', () => {
+    const file = importFile.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+        try {
+            const data = JSON.parse(reader.result);
+            const valid = data && Number.isFinite(data.start)
+                && Array.isArray(data.entries) && data.entries.length
+                && data.entries.every(e => Number.isFinite(e.t) && Number.isFinite(e.bt));
+            if (!valid) throw new Error('invalid');
+            if (confirm('Muat profile ini? Sesi saat ini akan ditimpa.')) {
+                applySession(data);
+                saveSession();
+            }
+        } catch (err) {
+            alert('File profile tidak valid.');
+        } finally {
+            importFile.value = '';
+        }
+    };
+    reader.onerror = () => alert('Gagal membaca file.');
+    reader.readAsText(file);
+});
 
 beanTempInput.addEventListener('input', refreshLogButtonState);
 
@@ -336,9 +387,11 @@ function loadSession() {
     }
 }
 
-(function restoreSession() {
-    const saved = loadSession();
-    if (!saved || !saved.start) return;
+function applySession(saved) {
+    clearInterval(timerInterval);
+    clearInterval(dryingInterval);
+    clearInterval(maillardInterval);
+    clearInterval(developmentInterval);
 
     startTime = new Date(saved.start);
     dryEndTime = saved.dryEnd ? new Date(saved.dryEnd) : null;
@@ -358,6 +411,12 @@ function loadSession() {
         timerInterval = setInterval(updateTimer, 1000);
         dryingInterval = setInterval(calculateAndUpdateRatios, 1000);
     }
+}
+
+(function restoreSession() {
+    const saved = loadSession();
+    if (!saved || !saved.start) return;
+    applySession(saved);
 })();
 
 initialWeightInput.addEventListener('input', saveSession);

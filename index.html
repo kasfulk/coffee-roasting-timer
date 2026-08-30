@@ -246,6 +246,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
             margin-bottom: 16px;
         }
 
@@ -417,6 +418,9 @@
             <div class="roast-actions">
                 <button id="logEntry" class="btn btn-primary" disabled>Log Data</button>
                 <button id="undoEntry" class="btn btn-secondary" disabled>Undo</button>
+                <button id="exportSession" class="btn btn-secondary" disabled>Export</button>
+                <button id="importSession" class="btn btn-secondary">Import</button>
+                <input id="importFile" type="file" accept=".json,application/json" hidden>
                 <span id="lastLog" class="roast-meta"></span>
             </div>
 
