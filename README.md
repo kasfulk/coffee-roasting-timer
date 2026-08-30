@@ -9,6 +9,9 @@ This application is a timer that calculates the Maillard Ratio, Development Rati
 - Calculate Maillard Ratio from the end of the drying phase
 - Calculate Development Ratio from the start of the first crack phase
 - Display all ratios in percentage and time
+- Log Bean Temperature (BT), Environment Temperature (ET), and current weight per minute
+- Auto-calculate ROR (Rate of Rise, °C/min) and Weight Loss %
+- Live chart of BT, ET, and ROR (Chart.js, bundled locally)
 
 ## Prerequisites
 

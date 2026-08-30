@@ -4,34 +4,448 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coffee Roasting Timer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link href="output.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            color: #f8fafc;
+        }
+
+        .page {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 380px minmax(480px, 1fr);
+            gap: 32px;
+            align-items: start;
+            width: 100%;
+        }
+
+        .two-col > .timer-side { width: 100%; }
+        .two-col > .card { max-width: none; }
+
+        @media (max-width: 980px) {
+            .two-col { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 32px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        .header { text-align: center; margin-bottom: 32px; }
+
+        .header h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+            color: #f8fafc;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+
+        .timer-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3.5rem;
+            font-weight: 500;
+            color: #f8fafc;
+            text-align: center;
+            line-height: 1;
+            margin-bottom: 28px;
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: none;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #ffffff;
+            cursor: pointer;
+            transition: filter 0.15s ease;
+        }
+
+        .btn:hover:not(:disabled) { filter: brightness(1.15); }
+        .btn:active:not(:disabled) { transform: scale(0.98); }
+
+        .btn:focus-visible {
+            outline: 2px solid #60a5fa;
+            outline-offset: 2px;
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn-primary { background: #2563eb; }
+        .btn-secondary { background: #475569; }
+        .btn-destructive { background: #dc2626; }
+
+        .phase-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .phase-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            transition: border-color 0.2s ease;
+        }
+
+        .phase-item.active { border-color: #3b82f6; }
+
+        .phase-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #475569;
+            flex-shrink: 0;
+        }
+
+        .phase-item.active .phase-dot {
+            background: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        .phase-item.completed .phase-dot { background: #22c55e; }
+
+        .phase-content { flex: 1; min-width: 0; }
+
+        .phase-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #f8fafc;
+        }
+
+        .phase-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #334155;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #3b82f6;
+            border-radius: 2px;
+            width: 0%;
+            transition: width 1s linear;
+        }
+
+        .footer {
+            text-align: center;
+            padding-top: 16px;
+            border-top: 1px solid #334155;
+        }
+
+        .footer a {
+            color: #64748b;
+            font-size: 0.75rem;
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+
+        .footer a:hover { color: #f8fafc; }
+
+        .footer a:focus-visible {
+            outline: 2px solid #60a5fa;
+            outline-offset: 2px;
+            border-radius: 2px;
+        }
+
+        .roast-section { margin-bottom: 24px; }
+
+        .roast-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 12px;
+        }
+
+        .roast-header h2 { font-size: 1rem; font-weight: 600; color: #f8fafc; }
+
+        .roast-status { font-size: 0.7rem; color: #64748b; }
+
+        .roast-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .roast-grid label {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+
+        .roast-grid input {
+            padding: 8px 10px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            color: #f8fafc;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .roast-grid input:focus {
+            outline: 2px solid #60a5fa;
+            outline-offset: 1px;
+        }
+
+        .roast-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .roast-actions .btn { flex: 1; padding: 8px 14px; font-size: 0.8rem; }
+
+        .roast-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            min-width: 0;
+        }
+
+        .roast-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .stat {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .stat-label { font-size: 0.65rem; color: #64748b; }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: #f8fafc;
+        }
+
+        .chart-wrap {
+            position: relative;
+            height: 220px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        .entry-table-wrap { overflow-x: auto; }
+
+        .entry-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+        }
+
+        .entry-table th {
+            text-align: left;
+            color: #64748b;
+            font-weight: 500;
+            padding: 4px 6px;
+            border-bottom: 1px solid #334155;
+            white-space: nowrap;
+        }
+
+        .entry-table td {
+            padding: 4px 6px;
+            color: #cbd5e1;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+            white-space: nowrap;
+        }
+
+        .entry-table tbody tr:last-child td { border-bottom: none; }
+        @media (prefers-reduced-motion: reduce) {
+            .btn, .phase-item, .progress-fill { transition: none; }
+            .btn:active:not(:disabled) { transform: none; }
+        }
+    </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
-    <div class="bg-white p-8 rounded shadow-md text-center">
-        <h1 class="text-2xl font-bold mb-4">Coffee Roasting Timer</h1>
-        <div class="mb-4 flex flex-auto gap-2">
-            <button id="charge" class="bg-blue-500 text-white px-4 py-2 rounded">Charge</button>
-            <button id="dryEnd" class="bg-yellow-500 text-white px-4 py-2 rounded ml-2">Dry End</button>
-            <button id="firstCrack" class="bg-red-500 text-white px-4 py-2 rounded ml-2">First Crack</button>
-            <button id="end" class="bg-green-500 text-white px-4 py-2 rounded ml-2">End</button>
+<body>
+    <div class="page">
+        <div class="two-col">
+            <div class="card timer-side">
+        <div class="header">
+            <h1>Coffee Roasting Timer</h1>
+            <p>Track your roast profile precisely</p>
         </div>
-        <div>
-            <p id="timer" class="text-[48px] font-mono mb-4">00:00:00</p>
-            <p id="dryingRatio" class="text-lg">Drying Ratio: N/A</p>
-            <p id="maillardRatio" class="text-lg">Maillard Ratio: N/A</p>
-            <p id="developmentRatio" class="text-lg">Development Ratio: N/A</p>
+
+        <p id="timer" class="timer-display">00:00:00</p>
+
+        <div class="btn-grid">
+            <button id="charge" class="btn btn-primary">Start Charge</button>
+            <button id="dryEnd" class="btn btn-secondary" disabled>Dry End</button>
+            <button id="firstCrack" class="btn btn-secondary" disabled>1st Crack</button>
+            <button id="end" class="btn btn-destructive" disabled>Finish</button>
         </div>
-        <div class="mt-40 flex justify-center items-center">
-            <a href="https://saweria.co/kasfulkurniawan" target="_blank">
-                <div class="grid grid-col col-1 gap-2 justify-center items-center w-full">
-                    <span class="font-bold text-xl">Support me on Saweria</span>
-                    <div class="flex w-full items-center justify-center">
-                        <img src="saweria.png" width="70" height="70" alt="Support me on Saweria" class="w-24 h-24 justify-self-center">
+
+        <div class="phase-list">
+            <div id="dryingIndicator" class="phase-item">
+                <div class="phase-dot"></div>
+                <div class="phase-content">
+                    <div class="phase-name">Drying</div>
+                    <div class="phase-meta">
+                        <span id="dryingRatio">N/A</span>
+                        <span>Phase 1</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="dryingProgress" class="progress-fill"></div>
                     </div>
                 </div>
-            </a>
+            </div>
+
+            <div id="maillardIndicator" class="phase-item">
+                <div class="phase-dot"></div>
+                <div class="phase-content">
+                    <div class="phase-name">Maillard</div>
+                    <div class="phase-meta">
+                        <span id="maillardRatio">N/A</span>
+                        <span>Phase 2</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="maillardProgress" class="progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="developmentIndicator" class="phase-item">
+                <div class="phase-dot"></div>
+                <div class="phase-content">
+                    <div class="phase-name">Development</div>
+                    <div class="phase-meta">
+                        <span id="developmentRatio">N/A</span>
+                        <span>Phase 3</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="developmentProgress" class="progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <a href="https://saweria.co/kasfulkurniawan" target="_blank" rel="noopener">Support on Saweria</a>
         </div>
     </div>
+
+    <div class="card">
+        <div class="roast-section">
+            <div class="roast-header">
+                <h2>Roast Profile</h2>
+                <span class="roast-status">log BT/ET every minute</span>
+            </div>
+
+            <div class="roast-grid">
+                <label>Green Weight (g)
+                    <input id="initialWeight" type="number" min="0" step="0.1" inputmode="decimal" placeholder="200">
+                </label>
+                <label>Bean Temp BT (°C) *
+                    <input id="beanTemp" type="number" min="0" step="0.1" inputmode="decimal" placeholder="150.5">
+                </label>
+                <label>Env Temp ET (°C)
+                    <input id="envTemp" type="number" min="0" step="0.1" inputmode="decimal" placeholder="90">
+                </label>
+                <label>Current Weight (g)
+                    <input id="currentWeight" type="number" min="0" step="0.1" inputmode="decimal" placeholder="optional">
+                </label>
+            </div>
+
+            <div class="roast-actions">
+                <button id="logEntry" class="btn btn-primary" disabled>Log Data</button>
+                <button id="undoEntry" class="btn btn-secondary" disabled>Undo</button>
+                <span id="lastLog" class="roast-meta"></span>
+            </div>
+
+            <div class="roast-stats">
+                <div class="stat"><span class="stat-label">Final BT</span><span id="statFinalBt" class="stat-value">–</span></div>
+                <div class="stat"><span class="stat-label">Avg ROR</span><span id="statAvgRor" class="stat-value">–</span></div>
+                <div class="stat"><span class="stat-label">Peak ROR</span><span id="statPeakRor" class="stat-value">–</span></div>
+                <div class="stat"><span class="stat-label">Weight Loss</span><span id="statLoss" class="stat-value">–</span></div>
+            </div>
+
+            <div class="chart-wrap">
+                <canvas id="roastChart"></canvas>
+            </div>
+
+            <div class="entry-table-wrap">
+                <table class="entry-table">
+                    <thead>
+                        <tr><th>Time</th><th>BT (°C)</th><th>ET (°C)</th><th>ROR (°C/min)</th><th>Weight (g)</th><th>Loss %</th></tr>
+                    </thead>
+                    <tbody id="entryTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+
+    <script src="chart.umd.min.js"></script>
+
     <script src="app.js"></script>
     <script>
         window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
